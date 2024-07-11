@@ -17,18 +17,18 @@ import google.generativeai as genai
 from langchain_community.document_loaders import PyPDFLoader
 from google.colab import userdata
 from langchain.tools import DuckDuckGoSearchRun
-genai.configure(api_key=GOOGLE_API_KEY)
+genai.configure(api_key=userdata.get('GOOGLE_API_KEY'))
 from IPython.display import display, Markdown
 os.environ['GOOGLE_API_KEY']=userdata.get('GOOGLE_API_KEY')
 
 class RAG:
-    def __init__(self, model_name, embedding_model_name):
+    def __init__(self, model_name = 'gemini-1.5-flash', embedding_model = "sentence-transformers/msmarco-distilbert-base-v4"):
         self.llm = ChatGoogleGenerativeAI(model=model_name,
                                           verbose=True,
                                           google_api_key=userdata.get('GOOGLE_API_KEY'),
                                           temperature = 0.3)
         self.embeddings = HuggingFaceEmbeddings(
-            model_name=embedding_model_name,
+            model_name=embedding_model,
             show_progress=False
             )
         self.all_pages = []
@@ -70,10 +70,10 @@ class RAG:
     def run(self, prompt):
       return self.assesser.run(prompt)
 
-def get_assesser(pdfs = list(), llm_model: str, embedding_model: str):
+def get_assesser(llm_model: str, embedding_model: str, pdfs = list()):
 	assesser = RAG(
 		model_name=llm_model,
-    	embedding_model_name=embedding_model
+    	embedding_model=embedding_model
     	)
 	assesser.setup(pdfs)
 	return assesser
@@ -103,10 +103,7 @@ class customAgent:
       self.task = "Please respond with a single question"
       self.prompt = self.prompt+self.task
       self.question = self.llm.invoke(self.prompt).content
-      # print(self.question)
       self.answer = self.rag.run(self.question)
-      # print(self.answer)
-      # print("===========================================================================")
       self.previous_interactions += f"Question: {self.question}\nAnswer: {self.answer}\n\n"
     self.prompt = f"""
         You are an agent and you will be assigned a task.
@@ -118,7 +115,3 @@ class customAgent:
     self.task = "Please suggest your solution now based on your assessment of the client based on your interactions. Ask any relevant questions that can be forwarded to the client"
     self.prompt = self.prompt+self.task
     self.final_output = self.llm.invoke(self.prompt).content
-
-
-
-
