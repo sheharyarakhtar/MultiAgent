@@ -19,8 +19,11 @@ from google.colab import userdata
 from langchain.tools import DuckDuckGoSearchRun
 genai.configure(api_key=GOOGLE_API_KEY)
 from IPython.display import display, Markdown
+from RAG import *
 from DocumentAssesser import *
-
+from customAgent import *
+from customtools import *
+#################### Custom Agent Workflow ###############
 rag = RAG(
 	model_name = 'gemini-1.5-flash',
 	embedding_model_name = 'sentence-transformers/msmarco-distilbert-base-v4'
